@@ -1,0 +1,16 @@
+// Main SASS entry point
+// Import in order: variables, mixins, then components
+
+// Base
+@use './variables';
+@use './mixins';
+
+// Layout
+@use './layout/header';
+
+// Components
+@use './components/book-card';
+@use './components/book-list';
+
+// Views
+@use './views/books-view';
