@@ -1,9 +1,13 @@
 export interface Book {
-  id: number
+  id: string
   title: string
+  subtitle?: string
   author: string
-  year: number
+  publisher?: string
+  price?: string
+  numPages?: number
   isbn?: string
-  coverUrl?: string
-  description?: string
+  cover?: string
+  abstract?: string
+  userId?: number
 }

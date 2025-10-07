@@ -1,12 +1,24 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useToast } from '@/composables/useToast'
 import type { Book } from '@/types/Book'
 import BookList from '@/components/BookList.vue'
+import Pagination from '@/components/Pagination.vue'
+import ConfirmModal from '@/components/ConfirmModal.vue'
 
+const toast = useToast()
 const books = ref<Book[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const searchQuery = ref('')
+
+// Delete state
+const showDeleteModal = ref(false)
+const bookToDelete = ref<string | null>(null)
+
+// Pagination State
+const currentPage = ref(1)
+const itemsPerPage = 10
 
 const fetchBooks = async () => {
   try {
@@ -40,9 +52,75 @@ const filteredBooks = computed(() => {
   )
 })
 
+// Pagination Computed Properties
+const totalPages = computed(() => Math.ceil(filteredBooks.value.length / itemsPerPage))
+
+const paginatedBooks = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredBooks.value.slice(start, end)
+})
+
 const clearSearch = () => {
   searchQuery.value = ''
+  currentPage.value = 1
 }
+
+const goToPage = (page: number) => {
+  currentPage.value = page
+  // Scroll to top of book list
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const handleDeleteClick = (bookId: string) => {
+  bookToDelete.value = bookId
+  showDeleteModal.value = true
+}
+
+const confirmDelete = async () => {
+  if (!bookToDelete.value) return
+
+  try {
+    const response = await fetch(`http://localhost:4730/books/${bookToDelete.value}`, {
+      method: 'DELETE'
+    })
+
+    if (!response.ok) {
+      throw new Error('Fehler beim Löschen des Buches')
+    }
+
+    // Remove book from local state
+    books.value = books.value.filter((book) => book.id !== bookToDelete.value)
+
+    toast.success('Buch erfolgreich gelöscht!')
+
+    // Adjust current page if needed
+    if (paginatedBooks.value.length === 0 && currentPage.value > 1) {
+      currentPage.value--
+    }
+  } catch (error) {
+    console.error('Error deleting book:', error)
+    toast.error('Fehler beim Löschen des Buches. Bitte versuchen Sie es erneut.')
+  } finally {
+    showDeleteModal.value = false
+    bookToDelete.value = null
+  }
+}
+
+const cancelDelete = () => {
+  showDeleteModal.value = false
+  bookToDelete.value = null
+}
+
+const getBookTitle = (bookId: string): string => {
+  const book = books.value.find((b) => b.id === bookId)
+  return book?.title || 'Dieses Buch'
+}
+
+// Reset to page 1 when search query changes
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
 
 onMounted(() => {
   fetchBooks()
@@ -53,8 +131,16 @@ onMounted(() => {
   <main>
     <div class="books-container">
       <header class="page-header">
-        <h1>Buchsammlung</h1>
-        <p class="subtitle">Entdecken Sie unsere Auswahl klassischer Literatur</p>
+        <div class="header-content">
+          <div class="header-text">
+            <h1>Buchsammlung</h1>
+            <p class="subtitle">Entdecken Sie unsere Auswahl klassischer Literatur</p>
+          </div>
+          <RouterLink to="/books/add" class="btn-add-book">
+            <span class="btn-icon">➕</span>
+            Neues Buch
+          </RouterLink>
+        </div>
       </header>
 
       <div v-if="!loading && !error" class="search-section" role="search">
@@ -110,9 +196,32 @@ onMounted(() => {
           <p>Keine Bücher gefunden für "{{ searchQuery }}"</p>
           <button @click="clearSearch" class="clear-search-button">Suche zurücksetzen</button>
         </div>
-        <BookList v-else :books="filteredBooks" />
+        <template v-else>
+          <div class="results-info">
+            Seite {{ currentPage }} von {{ totalPages }} ({{ filteredBooks.length }} Bücher gesamt)
+          </div>
+          <BookList :books="paginatedBooks" :show-actions="true" @delete="handleDeleteClick" />
+          <Pagination
+            v-if="totalPages > 1"
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            @page-change="goToPage"
+          />
+        </template>
       </template>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <ConfirmModal
+      v-if="showDeleteModal && bookToDelete"
+      title="Buch löschen?"
+      :message="`Möchten Sie '${getBookTitle(bookToDelete)}' wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`"
+      confirm-text="Löschen"
+      cancel-text="Abbrechen"
+      confirm-type="danger"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    />
   </main>
 </template>
 
@@ -124,8 +233,19 @@ onMounted(() => {
 }
 
 .page-header {
-  text-align: center;
   margin-bottom: 2.5rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.header-text {
+  text-align: center;
+  flex: 1;
 }
 
 h1 {
@@ -140,6 +260,30 @@ h1 {
   color: var(--color-text-muted);
   font-size: 1.125rem;
   margin: 0;
+}
+
+.btn-add-book {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-border-hover);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-add-book:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-icon {
+  font-size: 1.25rem;
 }
 
 /* Search Section */
@@ -230,6 +374,15 @@ h1 {
   font-weight: 500;
 }
 
+/* Results Info */
+.results-info {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
 /* Message States */
 .message {
   display: flex;
@@ -308,6 +461,20 @@ h1 {
 @media (max-width: 768px) {
   .books-container {
     padding: 1.5rem 1rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .header-text {
+    text-align: center;
+  }
+
+  .btn-add-book {
+    width: 100%;
+    justify-content: center;
   }
 
   h1 {

@@ -4,7 +4,16 @@ import BookCard from './BookCard.vue'
 
 defineProps<{
   books: Book[]
+  showActions?: boolean
 }>()
+
+const emit = defineEmits<{
+  delete: [bookId: string]
+}>()
+
+const handleDelete = (bookId: string) => {
+  emit('delete', bookId)
+}
 </script>
 
 <template>
@@ -14,7 +23,13 @@ defineProps<{
       <p>Keine Bücher verfügbar</p>
     </div>
     <div v-else class="books-grid">
-      <BookCard v-for="book in books" :key="book.id" :book="book" />
+      <BookCard
+        v-for="book in books"
+        :key="book.id"
+        :book="book"
+        :show-actions="showActions"
+        @delete="handleDelete"
+      />
     </div>
   </div>
 </template>
