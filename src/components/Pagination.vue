@@ -122,19 +122,21 @@ const nextPage = () => {
   </nav>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '@/assets/styles/modern-variables' as *;
+@use '@/assets/styles/modern-mixins' as *;
+
 .pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin: 3rem 0 2rem;
+  @include flex-center;
+  gap: $spacing-sm;
+  margin: $spacing-3xl 0 $spacing-2xl;
   flex-wrap: wrap;
+  @include fade-in(500ms, 300ms);
 }
 
 .pagination-pages {
   display: flex;
-  gap: 0.5rem;
+  gap: $spacing-sm;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -142,67 +144,94 @@ const nextPage = () => {
 .pagination-button {
   min-width: 2.5rem;
   height: 2.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 2px solid var(--color-border);
-  background: var(--color-background-soft);
-  color: var(--color-text);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
+  padding: $spacing-sm $spacing-md;
+  border: 2px solid transparent;
+  background: $color-white;
+  color: $color-gray-700;
+  border-radius: $radius-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  transition: all $transition-base $ease-out;
+  @include flex-center;
+  box-shadow: $shadow-sm;
+  position: relative;
+  overflow: hidden;
 
-.pagination-button:hover:not(:disabled):not(.pagination-ellipsis) {
-  background: var(--color-background-mute);
-  border-color: var(--color-border-hover);
-  transform: translateY(-2px);
-}
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: $gradient-primary;
+    opacity: 0;
+    transition: opacity $transition-base;
+  }
 
-.pagination-button:active:not(:disabled) {
-  transform: translateY(0);
-}
+  &:hover:not(:disabled):not(.pagination-ellipsis) {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: $shadow-md;
+    color: $color-primary;
 
-.pagination-button:focus-visible {
-  outline: 2px solid var(--color-border-hover);
-  outline-offset: 2px;
-}
+    &::before {
+      opacity: 0.1;
+    }
+  }
 
-.pagination-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  &:active:not(:disabled) {
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  @include focus-visible($color-primary);
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: $shadow-xs;
+  }
 }
 
 .pagination-active {
-  background: var(--color-border-hover);
-  border-color: var(--color-border-hover);
-  color: white;
-  font-weight: 600;
-}
+  background: $gradient-primary;
+  color: $color-white;
+  font-weight: $font-weight-bold;
+  box-shadow: $shadow-primary;
 
-.pagination-active:hover {
-  transform: none;
+  &::before {
+    opacity: 0;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: $shadow-primary, $shadow-glow;
+  }
 }
 
 .pagination-ellipsis {
   cursor: default;
   border-color: transparent;
   background: transparent;
-}
+  box-shadow: none;
+  color: $color-gray-400;
 
-.pagination-ellipsis:hover {
-  transform: none;
-  background: transparent;
-  border-color: transparent;
+  &:hover {
+    transform: none;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    color: $color-gray-400;
+  }
 }
 
 .pagination-prev,
 .pagination-next {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+
+  &:hover:not(:disabled) {
+    &::before {
+      opacity: 0.15;
+    }
+  }
 }
 
 /* Screen reader only */
@@ -219,26 +248,26 @@ const nextPage = () => {
 }
 
 /* Responsive */
-@media (max-width: 640px) {
+@include respond-to('sm') {
   .pagination {
-    gap: 0.375rem;
-    margin: 2rem 0 1.5rem;
+    gap: $spacing-xs;
+    margin: $spacing-2xl 0 $spacing-xl;
   }
 
   .pagination-pages {
-    gap: 0.375rem;
+    gap: $spacing-xs;
   }
 
   .pagination-button {
     min-width: 2.25rem;
     height: 2.25rem;
-    padding: 0.375rem 0.625rem;
-    font-size: 0.9rem;
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
   }
 
   .pagination-prev,
   .pagination-next {
-    font-size: 1.25rem;
+    font-size: $font-size-xl;
   }
 }
 </style>

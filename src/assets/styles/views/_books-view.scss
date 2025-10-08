@@ -1,0 +1,266 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.books-container {
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: $spacing-xl $container-padding;
+}
+
+.page-header {
+  margin-bottom: $spacing-2xl;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-xl;
+}
+
+.header-text {
+  text-align: center;
+  flex: 1;
+
+  h1 {
+    font-size: $font-size-5xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-md;
+    color: $color-heading;
+    letter-spacing: -0.02em;
+  }
+}
+
+.subtitle {
+  color: $color-text-muted;
+  font-size: $font-size-lg;
+  margin: 0;
+}
+
+.btn-add-book {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  background: $color-border-hover;
+  color: white;
+  text-decoration: none;
+  border-radius: $radius-md;
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-base;
+  transition: all $transition-base;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.btn-icon {
+  font-size: $font-size-xl;
+}
+
+// Search Section
+.search-section {
+  margin-bottom: $spacing-2xl;
+}
+
+.search-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-label {
+  display: block;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-heading;
+  margin-bottom: $spacing-md;
+  text-align: center;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: $color-background-soft;
+  border: 2px solid $color-border;
+  border-radius: $radius-lg;
+  transition: all $transition-slow;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: $color-border-hover;
+    box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}
+
+.search-icon {
+  padding: 0 $spacing-md;
+  font-size: $font-size-xl;
+  opacity: 0.6;
+}
+
+.search-input {
+  flex: 1;
+  padding: $spacing-md $spacing-sm;
+  border: none;
+  background: transparent;
+  font-size: $font-size-base;
+  color: $color-text;
+  outline: none;
+
+  &::placeholder {
+    color: $color-text-muted;
+  }
+}
+
+.clear-button {
+  @include flex-center;
+  padding: $spacing-sm $spacing-md;
+  background: transparent;
+  border: none;
+  font-size: $font-size-xl;
+  color: $color-text-muted;
+  cursor: pointer;
+  transition: all $transition-base;
+
+  &:hover {
+    color: $color-text;
+    background: $color-background-mute;
+  }
+
+  @include focus-visible;
+}
+
+.search-results-info {
+  margin-top: $spacing-md;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  font-weight: $font-weight-medium;
+}
+
+// Results Info
+.results-info {
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $color-text-muted;
+  margin-bottom: $spacing-lg;
+  font-weight: $font-weight-medium;
+}
+
+// Message States
+.message {
+  @include flex-column-center;
+  padding: $spacing-4xl $spacing-xl;
+  text-align: center;
+  gap: $spacing-md;
+
+  p {
+    font-size: $font-size-lg;
+    color: $color-text;
+    margin: 0;
+  }
+
+  &.error {
+    p {
+      color: #ef4444;
+      font-weight: $font-weight-medium;
+    }
+  }
+}
+
+.error-icon,
+.empty-icon {
+  font-size: 3rem;
+  opacity: 0.7;
+}
+
+// Spinner
+.spinner {
+  @include spinner;
+}
+
+// Buttons
+.retry-button,
+.clear-search-button {
+  padding: $spacing-md $spacing-lg;
+  background: $color-background-soft;
+  border: 2px solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  color: $color-text;
+  cursor: pointer;
+  transition: all $transition-slow;
+
+  &:hover {
+    background: $color-background-mute;
+    border-color: $color-border-hover;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Responsive Design
+@include respond-to('md') {
+  .books-container {
+    padding: $spacing-lg $container-padding;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  .header-text {
+    text-align: center;
+
+    h1 {
+      font-size: $font-size-3xl;
+    }
+  }
+
+  .subtitle {
+    font-size: $font-size-base;
+  }
+
+  .btn-add-book {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-section {
+    margin-bottom: $spacing-xl;
+  }
+
+  .message {
+    padding: $spacing-3xl $spacing-lg;
+
+    p {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+@include respond-to('sm') {
+  .header-text h1 {
+    font-size: $font-size-2xl;
+  }
+
+  .search-input-wrapper {
+    border-radius: $radius-md;
+  }
+
+  .search-input {
+    font-size: 0.95rem;
+    padding: $spacing-sm + 0.125rem $spacing-sm;
+  }
+}
